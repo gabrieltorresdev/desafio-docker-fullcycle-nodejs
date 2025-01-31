@@ -1,0 +1,46 @@
+services:
+  app:
+    container_name: desafio-docker-nodejs-app
+    image: node:lts
+    working_dir: /app
+    volumes:
+      - ./src:/app
+    depends_on:
+      - db
+    command: >
+      sh -c "npm install && npm start"
+    restart: always
+    expose:
+      - 3000
+    networks:
+      - desafio-docker-nodejs-network
+
+  nginx:
+    container_name: desafio-docker-nodejs-nginx
+    image: nginx:latest
+    ports:
+      - 8080:80
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    restart: always
+    networks:
+      - desafio-docker-nodejs-network
+
+  db:
+    container_name: desafio-docker-nodejs-db
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - desafio-docker-nodejs-network
+
+networks:
+  desafio-docker-nodejs-network:
+    driver: bridge
